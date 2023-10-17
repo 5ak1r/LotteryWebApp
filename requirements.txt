@@ -1,5 +1,5 @@
 werkzeug==2.3.7
-Flask
+Flask==2.3.3
 flask_sqlalchemy
 flask_login
 flask_wtf
