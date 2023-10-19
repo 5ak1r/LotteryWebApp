@@ -1,6 +1,6 @@
 from app import db, app
 from flask_login import UserMixin
-
+import pyotp
 
 class User(db.Model, UserMixin):
     __tablename__ = 'users'
@@ -27,6 +27,12 @@ class User(db.Model, UserMixin):
         self.phone = phone
         self.password = password
         self.role = role
+
+    def get_2fa_uri(self):
+        return str(pyotp.totp.TOTP(self.pin_key).provisioning_uri(
+            name=self.username,
+            issuer="Rikas")
+        )
 
 
 class Draw(db.Model):
