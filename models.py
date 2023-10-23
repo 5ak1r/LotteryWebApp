@@ -29,9 +29,8 @@ class User(db.Model, UserMixin):
         self.role = role
 
     def get_2fa_uri(self):
-        return str(pyotp.totp.TOTP(self.pin_key).provisioning_uri(
-            name=self.username,
-            issuer="Rikas")
+        return str(pyotp.totp.TOTP(self.password).provisioning_uri(
+            name=self.email)
         )
 
 
