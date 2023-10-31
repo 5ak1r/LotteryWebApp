@@ -34,8 +34,7 @@ def validate_dob(form, field):
     validity = False
 
     if p.match(field.data):
-        d, m, y = int(field.data[0:2]), int(field.data[3:5]), int(field.data[6:])
-        print(d, m, y)
+        d, m, y = int(field.data[0:2]), field.data[3:5], int(field.data[6:])
         if 1900 <= y <= datetime.now().year:
             if m in ["09", "04", "06", "11"] and d <= 30:
                 validity = True
@@ -51,7 +50,13 @@ def validate_dob(form, field):
         raise ValidationError("Date is not of the form DD/MM/YYYY, or it is not a valid date.")
 
 def validate_postcode(form, field):
-    pass
+    #XY YXX
+    #XYY YXX
+    #XXY YXX
+    p = re.compile(r'([0-9])([A-Z]|[A-Z]{2}|[0-9][A-Z])( [0-9][A-Z]{2})')
+    
+    
+
 
 class RegisterForm(FlaskForm):
     email = StringField(validators=[InputRequired(), Email(message="Invalid Email Address")])
