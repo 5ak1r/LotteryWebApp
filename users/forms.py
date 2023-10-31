@@ -27,11 +27,20 @@ def validate_password(form, field):
                               " one uppercase word character, and one special character.")
 
 
+def validate_dob(form, field):
+    pass
+
+
+def validate_postcode(form, field):
+    pass
+
 class RegisterForm(FlaskForm):
     email = StringField(validators=[DataRequired(), Email(message="Invalid Email Address")])
     firstname = StringField(validators=[DataRequired(), name_character_check])
     lastname = StringField(validators=[DataRequired(), name_character_check])
     phone = StringField(validators=[DataRequired(), validate_phone])
+    dob = StringField(validators=[DataRequired(), validate_dob])
+    postcode = StringField(validators=[DataRequired(), validate_postcode])
     password = PasswordField(validators=[DataRequired(), Length(min=6, max=12), validate_password])
     confirm_password = PasswordField(validators=[DataRequired(), EqualTo('password',
                                                                          message="Passwords do not match.")])
