@@ -1,6 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, PasswordField
-from wtforms.validators import Email, Length, DataRequired, EqualTo, ValidationError
+from wtforms.validators import Email, Length, InputRequired, EqualTo, ValidationError
+from datetime import datetime
 import re
 
 
@@ -28,20 +29,38 @@ def validate_password(form, field):
 
 
 def validate_dob(form, field):
-    pass
+    p = re.compile('(0[1-9]|[12][0-9]|3[01])/(0[1-9]|1[0-2])/\d{4}')
 
+    validity = False
+
+    if p.match(field.data):
+        d, m, y = int(field.data[0:2]), int(field.data[3:5]), int(field.data[6:])
+        print(d, m, y)
+        if 1900 <= y <= datetime.now().year:
+            if m in ["09", "04", "06", "11"] and d <= 30:
+                validity = True
+            elif m == "02":
+                # divisible by 100 but not 400 = not leap year (1900 not leap year)
+                if y % 4 == 0 or (y % 400 == 0 and y % 100 != 0):
+                    if d <= 29:
+                        validity = True
+            elif m not in ["02", "09", "04", "06", "11"]:
+                validity = True
+
+    if not validity:
+        raise ValidationError("Date is not of the form DD/MM/YYYY, or it is not a valid date.")
 
 def validate_postcode(form, field):
     pass
 
 class RegisterForm(FlaskForm):
-    email = StringField(validators=[DataRequired(), Email(message="Invalid Email Address")])
-    firstname = StringField(validators=[DataRequired(), name_character_check])
-    lastname = StringField(validators=[DataRequired(), name_character_check])
-    phone = StringField(validators=[DataRequired(), validate_phone])
-    dob = StringField(validators=[DataRequired(), validate_dob])
-    postcode = StringField(validators=[DataRequired(), validate_postcode])
-    password = PasswordField(validators=[DataRequired(), Length(min=6, max=12), validate_password])
-    confirm_password = PasswordField(validators=[DataRequired(), EqualTo('password',
+    email = StringField(validators=[InputRequired(), Email(message="Invalid Email Address")])
+    firstname = StringField(validators=[InputRequired(), name_character_check])
+    lastname = StringField(validators=[InputRequired(), name_character_check])
+    phone = StringField(validators=[InputRequired(), validate_phone])
+    dob = StringField(validators=[InputRequired(), validate_dob])
+    postcode = StringField(validators=[InputRequired(), validate_postcode])
+    password = PasswordField(validators=[InputRequired(), Length(min=6, max=12), validate_password])
+    confirm_password = PasswordField(validators=[InputRequired(), EqualTo('password',
                                                                          message="Passwords do not match.")])
     submit = SubmitField()

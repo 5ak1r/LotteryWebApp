@@ -30,6 +30,8 @@ def register():
                         firstname=form.firstname.data,
                         lastname=form.lastname.data,
                         phone=form.phone.data,
+                        dob=form.dob.data,
+                        postcode=form.postcode.data,
                         password=form.password.data,
                         role='user')
 
@@ -58,7 +60,9 @@ def account():
                            email="PLACEHOLDER FOR USER EMAIL",
                            firstname="PLACEHOLDER FOR USER FIRSTNAME",
                            lastname="PLACEHOLDER FOR USER LASTNAME",
-                           phone="PLACEHOLDER FOR USER PHONE")
+                           phone="PLACEHOLDER FOR USER PHONE",
+                           dob="PLACEHOLDER FOR USER DOB",
+                           postcode="PLACEHOLDER FOR USER POSTCODE")
 
 
 @users_blueprint.route('/setup_2fa')
