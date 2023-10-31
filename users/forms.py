@@ -54,9 +54,11 @@ def validate_postcode(form, field):
     #XYY YXX
     #XXY YXX
     p = re.compile(r'([0-9])([A-Z]|[A-Z]{2}|[0-9][A-Z])( [0-9][A-Z]{2})')
-    
-    
 
+    if not p.match(field.data):
+        raise ValidationError("Postcode is not of any of the required forms: XY YXX, XYY YXX, XXY YXX.")
+    
+    
 
 class RegisterForm(FlaskForm):
     email = StringField(validators=[InputRequired(), Email(message="Invalid Email Address")])
