@@ -35,23 +35,23 @@ app.register_blueprint(lottery_blueprint)
 # ERROR HANDLING
 @app.errorhandler(400)
 def internal_error(error):
-    return render_template('400.html'), 400
+    return render_template('errors/400.html'), 400
 
 @app.errorhandler(403)
 def internal_error(error):
-    return render_template('403.html'), 403
+    return render_template('errors/403.html'), 403
 
 @app.errorhandler(404)
 def internal_error(error):
-    return render_template('404.html'), 404
+    return render_template('errors/404.html'), 404
 
 @app.errorhandler(500)
 def internal_error(error):
-    return render_template('500.html'), 500
+    return render_template('errors/500.html'), 500
 
 @app.errorhandler(503)
 def internal_error(error):
-    return render_template('503.html'), 503
+    return render_template('errors/503.html'), 503
 
 
 if __name__ == "__main__":
