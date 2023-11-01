@@ -31,5 +31,13 @@ app.register_blueprint(users_blueprint)
 app.register_blueprint(admin_blueprint)
 app.register_blueprint(lottery_blueprint)
 
+
+# ERROR HANDLING
+@app.errorhandler(500)
+def internal_error(error):
+    return render_template('500.html'), 500
+
+
+
 if __name__ == "__main__":
     app.run()

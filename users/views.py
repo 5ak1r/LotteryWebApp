@@ -81,4 +81,3 @@ def setup_2fa():
         'Pragma': 'no-cache',
         'Expires': '0'
     }
-
