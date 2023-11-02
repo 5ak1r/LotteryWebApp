@@ -3,7 +3,7 @@ from flask import Blueprint, render_template, flash, redirect, url_for, session
 from app import db
 from models import User
 from users.forms import RegisterForm, LoginForm
-from MarkupSafe import Markup
+from markupsafe import Markup
 import pyotp
 
 # CONFIG
@@ -72,6 +72,12 @@ def login():
 
 
     return render_template('users/login.html', form=form)
+
+
+@users_blueprint.route('/reset')
+def reset():
+    session['authentication_attempts'] = 0
+    return redirect(url_for('users.login'))
 
 
 # view user account
