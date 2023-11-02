@@ -54,11 +54,7 @@ def login():
 
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
-<<<<<<< HEAD
         if not user == False and user.verify_password(user.password) and pyotp.TOTP(user.pin_key).verify(form.pin.data):
-=======
-        if not user == False and user.verify_password(user.password):
->>>>>>> abf1972e224ebd9d7894b7b9033c3ed24cde3d54
             return redirect(url_for('lottery.lottery'))
         else:
             flash('Check login details and try again.')
