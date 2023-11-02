@@ -3,6 +3,7 @@ from flask import Blueprint, render_template, flash, redirect, url_for, session
 from app import db
 from models import User
 from users.forms import RegisterForm, LoginForm
+import pyotp
 
 # CONFIG
 users_blueprint = Blueprint('users', __name__, template_folder='templates')
@@ -53,11 +54,12 @@ def login():
 
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
-        if not user == False and user.verify_password(user.password):
+        if not user == False and user.verify_password(user.password) and pyotp.TOTP(user.pin_key).verify(form.pin.data):
             return redirect(url_for('lottery.lottery'))
         else:
             flash('Check login details and try again.')
             return render_template('users/login.html', form=form)
+    
 
 
     return render_template('users/login.html', form=form)
