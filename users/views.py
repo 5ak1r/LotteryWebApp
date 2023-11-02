@@ -3,6 +3,7 @@ from flask import Blueprint, render_template, flash, redirect, url_for, session
 from app import db
 from models import User
 from users.forms import RegisterForm, LoginForm
+from MarkupSafe import Markup
 import pyotp
 
 # CONFIG
@@ -52,12 +53,20 @@ def register():
 def login():
     form = LoginForm()
 
+    if not session.get('authentication_attempts'):
+        session['authentication_attempts'] = 0
+
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
         if not user == False and user.verify_password(user.password) and pyotp.TOTP(user.pin_key).verify(form.pin.data):
             return redirect(url_for('lottery.lottery'))
         else:
-            flash('Check login details and try again.')
+            session['authentication_attempts'] += 1
+
+            if session.get('authentication_attempts') >= 3:
+                flash(Markup('Number of incorrect login attempts exceeded. Please click <a href="/reset">here</a> to reset.'))
+                return render_template('users/login.html')
+            flash('Please check your login details and try again, {} login attempts remaining'.format(3 - session.get('authentication_attempts')))
             return render_template('users/login.html', form=form)
     
 
