@@ -54,11 +54,13 @@ def login():
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
         if not user == False and user.verify_password(user.password):
-            return redirect(url_for('lottery/lottery.html', name=user.first_name))
+            return redirect(url_for('lottery.lottery'))
         else:
             flash('Check login details and try again.')
             return render_template('users/login.html', form=form)
 
+
+    return render_template('users/login.html', form=form)
 
 
 # view user account
