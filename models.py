@@ -37,6 +37,9 @@ class User(db.Model, UserMixin):
         return str(pyotp.totp.TOTP(self.pin_key).provisioning_uri(
             name=self.email)
         )
+    
+    def verify_password(self, password):
+        return self.password == password
 
 
 class Draw(db.Model):

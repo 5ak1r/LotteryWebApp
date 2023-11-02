@@ -71,3 +71,9 @@ class RegisterForm(FlaskForm):
     confirm_password = PasswordField(validators=[InputRequired(), EqualTo('password',
                                                                          message="Passwords do not match.")])
     submit = SubmitField()
+
+
+class LoginForm(FlaskForm):
+    email = StringField(validators=[InputRequired(), Email()])
+    password = PasswordField(validators=[InputRequired()])
+    submit = SubmitField()
