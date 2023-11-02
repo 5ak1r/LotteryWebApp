@@ -58,11 +58,10 @@ def login():
 
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
-        if not user == False and user.verify_password(user.password) and pyotp.TOTP(user.pin_key).verify(form.pin.data):
+        if not user and user.verify_password(user.password) and user.verify_pin(form.pin.data) and user.verify_postcode(form.postcode.data):
             return redirect(url_for('lottery.lottery'))
         else:
             session['authentication_attempts'] += 1
-
             if session.get('authentication_attempts') >= 3:
                 flash(Markup('Number of incorrect login attempts exceeded. Please click <a href="/reset">here</a> to reset.'))
                 return render_template('users/login.html')
