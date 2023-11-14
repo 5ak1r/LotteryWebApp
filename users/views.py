@@ -4,6 +4,7 @@ from app import db
 from models import User
 from users.forms import RegisterForm, LoginForm
 from markupsafe import Markup
+from flask_login import current_user
 import pyotp
 
 # CONFIG
@@ -58,19 +59,25 @@ def login():
 
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
-        if not user and user.verify_password(user.password) and user.verify_pin(form.pin.data) and user.verify_postcode(form.postcode.data):
-            return redirect(url_for('lottery.lottery'))
-        else:
+
+        if not user or not user.verify_password(form.password.data) or not user.verify_pin(form.pin.data) or not user.verify_postcode(form.postcode.data):
             session['authentication_attempts'] += 1
             if session.get('authentication_attempts') >= 3:
                 flash(Markup('Number of incorrect login attempts exceeded. Please click <a href="/reset">here</a> to reset.'))
                 return render_template('users/login.html')
             flash('Please check your login details and try again, {} login attempts remaining'.format(3 - session.get('authentication_attempts')))
             return render_template('users/login.html', form=form)
+        else:
+            login_user(user)
+            return redirect(url_for('lottery.lottery'))
+            
     
-
-
     return render_template('users/login.html', form=form)
+
+@users_blueprint.route('/logout')
+def logout():
+    logout_user()
+    return redirect(url_for('main.index’))
 
 
 @users_blueprint.route('/reset')
@@ -83,13 +90,13 @@ def reset():
 @users_blueprint.route('/account')
 def account():
     return render_template('users/account.html',
-                           acc_no="PLACEHOLDER FOR USER ID",
-                           email="PLACEHOLDER FOR USER EMAIL",
-                           firstname="PLACEHOLDER FOR USER FIRSTNAME",
-                           lastname="PLACEHOLDER FOR USER LASTNAME",
-                           phone="PLACEHOLDER FOR USER PHONE",
-                           dob="PLACEHOLDER FOR USER DOB",
-                           postcode="PLACEHOLDER FOR USER POSTCODE")
+                           acc_no=current_user.id,
+                           email=current_user.email,
+                           firstname=current_user.firstname,
+                           lastname=current_user.lastname,
+                           phone=current_user.phone,
+                           dob=current_user.dob,
+                           postcode=current_user.postcode)
 
 
 @users_blueprint.route('/setup_2fa')

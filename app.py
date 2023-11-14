@@ -2,6 +2,7 @@
 from flask import Flask, render_template
 from flask_sqlalchemy import SQLAlchemy
 from flask_qrcode import QRcode
+from flask_login import LoginManager
 import os
 
 # CONFIG
@@ -18,6 +19,17 @@ app.config['RECAPTCHA_PRIVATE_KEY'] = os.getenv('RECAPTCHA_PRIVATE_KEY')
 # initialise database and QRcode
 db = SQLAlchemy(app)
 qrcode = QRcode(app)
+
+
+# initialise login manager
+login_manager = LoginManager()
+login_manager.login_view = 'users.login'
+login_manager.init_app(app)
+
+@login_manager.user_loader
+def load_user(id):
+    from models import User
+    return User.query.get(int(id))
 
 # HOME PAGE VIEW
 @app.route('/')
