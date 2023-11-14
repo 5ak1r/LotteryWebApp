@@ -4,7 +4,7 @@ from app import db
 from models import User
 from users.forms import RegisterForm, LoginForm
 from markupsafe import Markup
-from flask_login import current_user
+from flask_login import current_user, login_user, logout_user
 import pyotp
 
 # CONFIG
@@ -77,7 +77,7 @@ def login():
 @users_blueprint.route('/logout')
 def logout():
     logout_user()
-    return redirect(url_for('main.index’))
+    return redirect(url_for('main.index'))
 
 
 @users_blueprint.route('/reset')
