@@ -15,7 +15,7 @@ app.config['RECAPTCHA_PRIVATE_KEY'] = os.getenv('RECAPTCHA_PRIVATE_KEY')
 
 
 
-# initialise database
+# initialise database and QRcode
 db = SQLAlchemy(app)
 qrcode = QRcode(app)
 
@@ -39,24 +39,29 @@ app.register_blueprint(lottery_blueprint)
 
 # ERROR HANDLING
 @app.errorhandler(400)
-def internal_error(error):
-    return render_template('errors/400.html'), 400
+def bad_request(error):
+    return render_template('errors/error.html', error="Bad Request", text="The server cannot or will not process the request due to something that is perceived to be a client error.",
+                           link="https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400"), 400
 
 @app.errorhandler(403)
-def internal_error(error):
-    return render_template('errors/403.html'), 403
+def forbidden(error):
+    return render_template('errors/error.html', error="Forbidden", text="The client does not have access rights to the content.",
+                           link="https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/403"), 403
 
 @app.errorhandler(404)
-def internal_error(error):
-    return render_template('errors/404.html'), 404
+def not_found(error):
+     return render_template('errors/error.html', error="Not Found", text="The server cannot find the requested resource.",
+                           link="https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404"), 404
 
 @app.errorhandler(500)
-def internal_error(error):
-    return render_template('errors/500.html'), 500
+def internal_server_error(error):
+    return render_template('errors/error.html', error="Internal Server Error", text="The server has encountered a situation it does not know how to handle.",
+                           link="https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/500"), 500
 
 @app.errorhandler(503)
-def internal_error(error):
-    return render_template('errors/503.html'), 503
+def service_unavailable(error):
+    return render_template('errors/error.html', error="Service Unavailable", text="The server is not ready to handle the request.",
+                           link="https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/503"), 503
 
 
 if __name__ == "__main__":
