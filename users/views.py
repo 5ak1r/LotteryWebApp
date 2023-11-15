@@ -1,6 +1,6 @@
 # IMPORTS
 from flask import Blueprint, render_template, flash, redirect, url_for, session
-from app import db
+from app import db, requires_roles
 from models import User
 from users.forms import RegisterForm, LoginForm
 from markupsafe import Markup
@@ -28,6 +28,15 @@ def register():
             flash('Email address already exists')
             return render_template('users/register.html', form=form)
 
+        # admin registration screen creates new admin, else user
+        try:
+            if current_user.role == 'admin':
+                role='admin'
+            else:
+                role='user'
+        except:
+            role='user'
+
         # create a new user with the form data
         new_user = User(email=form.email.data,
                         firstname=form.firstname.data,
@@ -36,15 +45,19 @@ def register():
                         dob=form.dob.data,
                         postcode=form.postcode.data,
                         password=form.password.data,
-                        role='user')
+                        role=role)
 
         # add the new user to the database
         db.session.add(new_user)
         db.session.commit()
 
         session['username'] = new_user.email
-        # sends user to set up 2-factor authentication
-        return redirect(url_for('users.setup_2fa'))
+        # sends user to set up 2-factor authentication; sends admin back to admin page
+        if role == 'user':
+            return redirect(url_for('users.setup_2fa'))
+        elif role == 'admin':
+            flash("New admin registered successfully")
+            return redirect(url_for('admin.admin'))
     # if request method is GET or form not valid re-render signup page
     return render_template('users/register.html', form=form)
 
@@ -70,9 +83,12 @@ def login():
                 return render_template('users/login.html', form=form)
             else:
                 login_user(user)
-                return redirect(url_for('lottery.lottery'))
+                if current_user.role == "admin":
+                    return redirect(url_for('admin.admin'))
+                else:
+                    return redirect(url_for('lottery.lottery'))
             
-    
+
         return render_template('users/login.html', form=form)
     else:
         flash("You are already logged in.")
@@ -93,6 +109,7 @@ def reset():
 # view user account
 @users_blueprint.route('/account')
 @login_required
+@requires_roles('user', 'admin')
 def account():
     return render_template('users/account.html',
                            acc_no=current_user.id,
@@ -105,6 +122,7 @@ def account():
 
 
 @users_blueprint.route('/setup_2fa')
+@requires_roles('user')
 def setup_2fa():
     if 'username' not in session:
         return redirect(url_for('main.index'))

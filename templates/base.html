@@ -37,12 +37,17 @@
                                 Login
                             </a>
                             {% endif %}
-                            {% if current_user.is_authenticated %}
-                            <a href="{{ url_for('lottery.lottery') }}" class="navbar-item">
-                                Lottery
-                            </a>
+                            {% if current_user.is_authenticated and current_user.role ==  'admin' %}
+                            <a href="{{ url_for('users.register') }}" class="navbar-item">
+                                Register Admin
+                            </a>             
                             <a href="{{ url_for('admin.admin') }}" class="navbar-item">
                                 Admin
+                            </a>
+                            {% endif %}
+                            {% if current_user.is_authenticated and current_user.role == 'user' %}
+                            <a href="{{ url_for('lottery.lottery') }}" class="navbar-item">
+                                Lottery
                             </a>
                             {% endif %}
                             {% if current_user.is_authenticated %}

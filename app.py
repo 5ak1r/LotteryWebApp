@@ -2,7 +2,8 @@
 from flask import Flask, render_template
 from flask_sqlalchemy import SQLAlchemy
 from flask_qrcode import QRcode
-from flask_login import LoginManager
+from flask_login import LoginManager, current_user
+from functools import wraps
 import os
 
 # CONFIG
@@ -14,6 +15,15 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['RECAPTCHA_PUBLIC_KEY'] = os.getenv('RECAPTCHA_PUBLIC_KEY')
 app.config['RECAPTCHA_PRIVATE_KEY'] = os.getenv('RECAPTCHA_PRIVATE_KEY')
 
+def requires_roles(*roles):
+    def wrapper(f):
+        @wraps(f)
+        def wrapped(*args, **kwargs):
+            if current_user.role not in roles:
+                return render_template('403.html')
+            return f(*args, **kwargs)
+        return wrapped
+    return wrapper
 
 
 # initialise database and QRcode
