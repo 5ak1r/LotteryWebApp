@@ -2,7 +2,7 @@
 from flask import Blueprint, render_template, flash, redirect, url_for, session
 from app import db, requires_roles
 from models import User
-from users.forms import RegisterForm, LoginForm
+from users.forms import RegisterForm, LoginForm, PasswordForm
 from markupsafe import Markup
 from flask_login import current_user, login_user, logout_user, login_required
 import pyotp
@@ -140,7 +140,7 @@ def setup_2fa():
 
 
 @users_blueprint.route('/change_password', methods=['GET', 'POST'])
-def update_password():
+def change_password():
     form = PasswordForm()
 
     if form.validate_on_submit():
