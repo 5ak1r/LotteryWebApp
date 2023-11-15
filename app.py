@@ -52,7 +52,7 @@ def index():
 from users.views import users_blueprint
 from admin.views import admin_blueprint
 from lottery.views import lottery_blueprint
-#
+
 # # register blueprints with app
 app.register_blueprint(users_blueprint)
 app.register_blueprint(admin_blueprint)

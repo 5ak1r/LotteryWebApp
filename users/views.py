@@ -122,7 +122,6 @@ def account():
 
 
 @users_blueprint.route('/setup_2fa')
-@requires_roles('user')
 def setup_2fa():
     if 'username' not in session:
         return redirect(url_for('main.index'))
@@ -138,3 +137,24 @@ def setup_2fa():
         'Pragma': 'no-cache',
         'Expires': '0'
     }
+
+
+@users_blueprint.route('/change_password', methods=['GET', 'POST'])
+def update_password():
+    form = PasswordForm()
+
+    if form.validate_on_submit():
+
+        if form.current_password.data == current_user.password:
+            if form.new_password.data != current_user.password:
+                current_user.password = form.new_password.data
+                db.session.commit()
+                flash('Password changed successfully')
+            else:
+                flash('New password matches old password')
+        else:
+            flash('Current password entered incorrectly')
+
+        return redirect(url_for('users.account'))
+
+    return render_template('users/change_password.html', form=form)
