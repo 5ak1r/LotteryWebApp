@@ -68,7 +68,9 @@
 
                     {# render playable draws #}
                     {% for draw in playable_draws %}
+                    {% if draw.user_id == current_user.id %}
                         <p>{{ draw.numbers }}</p>
+                    {% endif %}
                     {% endfor %}
 
                 </div>
@@ -95,6 +97,7 @@
 
                         {# render results #}
                         {% for draw in results %}
+                        {% if draw.user_id == current_user.id %}
                             <tr>
                                 <td>{{ draw.lottery_round }}</td>
                                 <td>{{ draw.numbers }}</td>
@@ -105,6 +108,7 @@
                                     <td>{{ draw.matches_master }}</td>
                                 {% endif %}
                             </tr>
+                        {% endif %}
                         {% endfor %}
                     </table>
                 </div>

@@ -4,7 +4,7 @@ from app import db
 from models import User
 from users.forms import RegisterForm, LoginForm
 from markupsafe import Markup
-from flask_login import current_user, login_user, logout_user
+from flask_login import current_user, login_user, logout_user, login_required
 import pyotp
 
 # CONFIG
@@ -52,32 +52,36 @@ def register():
 # view user login
 @users_blueprint.route('/login', methods=['GET', 'POST'])
 def login():
-    form = LoginForm()
+    if current_user.is_anonymous:
+        form = LoginForm()
 
-    if not session.get('authentication_attempts'):
-        session['authentication_attempts'] = 0
+        if not session.get('authentication_attempts'):
+            session['authentication_attempts'] = 0
 
-    if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data).first()
+        if form.validate_on_submit():
+            user = User.query.filter_by(email=form.email.data).first()
 
-        if not user or not user.verify_password(form.password.data) or not user.verify_pin(form.pin.data) or not user.verify_postcode(form.postcode.data):
-            session['authentication_attempts'] += 1
-            if session.get('authentication_attempts') >= 3:
-                flash(Markup('Number of incorrect login attempts exceeded. Please click <a href="/reset">here</a> to reset.'))
-                return render_template('users/login.html')
-            flash('Please check your login details and try again, {} login attempts remaining'.format(3 - session.get('authentication_attempts')))
-            return render_template('users/login.html', form=form)
-        else:
-            login_user(user)
-            return redirect(url_for('lottery.lottery'))
+            if not user or not user.verify_password(form.password.data) or not user.verify_pin(form.pin.data) or not user.verify_postcode(form.postcode.data):
+                session['authentication_attempts'] += 1
+                if session.get('authentication_attempts') >= 3:
+                    flash(Markup('Number of incorrect login attempts exceeded. Please click <a href="/reset">here</a> to reset.'))
+                    return render_template('users/login.html')
+                flash('Please check your login details and try again, {} login attempts remaining'.format(3 - session.get('authentication_attempts')))
+                return render_template('users/login.html', form=form)
+            else:
+                login_user(user)
+                return redirect(url_for('lottery.lottery'))
             
     
-    return render_template('users/login.html', form=form)
+        return render_template('users/login.html', form=form)
+    else:
+        flash("You are already logged in.")
+        return render_template('main/index.html')
 
 @users_blueprint.route('/logout')
 def logout():
     logout_user()
-    return redirect(url_for('main.index'))
+    return render_template('main/index.html')
 
 
 @users_blueprint.route('/reset')
@@ -88,6 +92,7 @@ def reset():
 
 # view user account
 @users_blueprint.route('/account')
+@login_required
 def account():
     return render_template('users/account.html',
                            acc_no=current_user.id,
