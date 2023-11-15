@@ -20,7 +20,7 @@ def requires_roles(*roles):
         @wraps(f)
         def wrapped(*args, **kwargs):
             if current_user.role not in roles:
-                return render_template('403.html')
+                return forbidden(403)
             return f(*args, **kwargs)
         return wrapped
     return wrapper

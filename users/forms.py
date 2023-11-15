@@ -53,7 +53,7 @@ def validate_postcode(form, field):
     #XY YXX
     #XYY YXX
     #XXY YXX
-    p = re.compile(r'([0-9])([A-Z]|[A-Z]{2}|[0-9][A-Z])( [0-9][A-Z]{2})')
+    p = re.compile(r'([A-Z])([0-9]|[0-9]{2}|[A-Z][0-9])( [0-9][A-Z]{2})')
 
     if not p.match(field.data):
         raise ValidationError("Postcode is not of any of the required forms: XY YXX, XYY YXX, XXY YXX.")
