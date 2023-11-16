@@ -5,7 +5,8 @@ from models import User
 from users.forms import RegisterForm, LoginForm, PasswordForm
 from markupsafe import Markup
 from flask_login import current_user, login_user, logout_user, login_required
-import pyotp, datetime, logging
+from datetime import datetime
+import pyotp, logging
 
 # CONFIG
 users_blueprint = Blueprint('users', __name__, template_folder='templates')
