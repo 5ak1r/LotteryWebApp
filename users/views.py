@@ -1,11 +1,11 @@
 # IMPORTS
-from flask import Blueprint, render_template, flash, redirect, url_for, session
+from flask import Blueprint, render_template, flash, redirect, url_for, session, request
 from app import db, requires_roles
 from models import User
 from users.forms import RegisterForm, LoginForm, PasswordForm
 from markupsafe import Markup
 from flask_login import current_user, login_user, logout_user, login_required
-import pyotp
+import pyotp, datetime, logging
 
 # CONFIG
 users_blueprint = Blueprint('users', __name__, template_folder='templates')
@@ -47,6 +47,9 @@ def register():
                         password=form.password.data,
                         role=role)
 
+        logging.warning('SECURITY - User Registration [%s, %s]',
+                        form.email.data,
+                        request.remote_addr)
         # add the new user to the database
         db.session.add(new_user)
         db.session.commit()
@@ -76,6 +79,9 @@ def login():
 
             if not user or not user.verify_password(form.password.data) or not user.verify_pin(form.pin.data) or not user.verify_postcode(form.postcode.data):
                 session['authentication_attempts'] += 1
+                logging.warning('SECURITY - Failed Login [%s, %s]',
+                                current_user.email,
+                                request.remote_addr)
                 if session.get('authentication_attempts') >= 3:
                     flash(Markup('Number of incorrect login attempts exceeded. Please click <a href="/reset">here</a> to reset.'))
                     return render_template('users/login.html')
@@ -83,6 +89,21 @@ def login():
                 return render_template('users/login.html', form=form)
             else:
                 login_user(user)
+
+                logging.warning('SECURITY - Log In [%s, %s, %s]',
+                                current_user.id,
+                                current_user.email,
+                                request.remote_addr)
+                
+                current_user.last_login = current_user.current_login
+                current_user.ip_last = current_user.ip_current
+                current_user.current_login = datetime.now()
+                current_user.ip_current = request.remote_addr
+
+                current_user.successful_logins += 1
+
+                db.session.commit()
+
                 if current_user.role == "admin":
                     return redirect(url_for('admin.admin'))
                 else:
@@ -97,6 +118,12 @@ def login():
 @users_blueprint.route('/logout')
 def logout():
     logout_user()
+
+    logging.warning('SECURITY - Log Out [%s, %s, %s]',
+                                current_user.id,
+                                current_user.email,
+                                request.remote_addr)
+    
     return render_template('main/index.html')
 
 

@@ -1,10 +1,10 @@
 # IMPORTS
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_qrcode import QRcode
 from flask_login import LoginManager, current_user
 from functools import wraps
-import os
+import logging, os
 
 # CONFIG
 app = Flask(__name__)
@@ -20,6 +20,12 @@ def requires_roles(*roles):
         @wraps(f)
         def wrapped(*args, **kwargs):
             if current_user.role not in roles:
+                logging.warning('SECURITY - Unauthorised Access Denied [%s, %s, %s, %s]',
+                                current_user.id,
+                                current_user.email,
+                                current_user.role,
+                                request.remote_addr)
+                
                 return forbidden(403)
             return f(*args, **kwargs)
         return wrapped
@@ -30,6 +36,22 @@ def requires_roles(*roles):
 db = SQLAlchemy(app)
 qrcode = QRcode(app)
 
+# initialise logger and file handler
+logger = logging.getLogger()
+logger.setLevel(logging.DEBUG)
+file_handler = logging.FileHandler('lottery.log', 'a')
+file_handler.setLevel(logging.WARNING)
+
+
+class SecurityFilter(logging.Filter):
+    
+    def filter(self, record):
+        return 'SECURITY' in record.getMessage()
+    
+file_handler.addFilter(SecurityFilter())
+formatter = logging.Formatter('%(asctime)s : %(message)s', '%m/%d/%Y %I:%M:%S %p')
+file_handler.setFormatter(formatter)
+logger.addHandler(file_handler)
 
 # initialise login manager
 login_manager = LoginManager()

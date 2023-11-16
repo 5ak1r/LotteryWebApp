@@ -123,6 +123,43 @@
         </form>
         </div>
     </div>
+    <div class="column is-8 is-offset-2" id="test">
+        <h4 class="title is-4">User Activity Logs</h4>
+        <div class="box">
+            {% if logs %}
+                <div class="field">
+                    <table class="table">
+                        <tr>
+                            <th>ID</th>
+                            <th>Email</th>
+                            <th>Registration</th>
+                            <th>Current Log In</th>
+                            <th>Current Log In IP</th>
+                            <th>Last Log In</th>
+                            <th>Last Log In IP</th>
+                            <th>Total Successful Logins</th>
+                        </tr>
+                        {% for user in activity %}
+                            <tr>
+                                <td>{{ user.id }}</td>
+                                <td>{{ user.email }}</td>
+                                <td>{{ user.registered_on }}</td>
+                                <td>{{ user.current_login }}</td>
+                                <td>{{ user.ip_current }}</td>
+                                <td>{{ user.last_login }}</td>
+                                <td>{{ user.ip_last }}</td>
+                                <td>{{ user.successful_logins }}</td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+            {% endif %}
+            <form action="/view_user_activity">
+                <div>
+                    <button class="button is-info is-centered">View User Activity</button>
+                </div>
+            </form>
+            </div>
+        </div>
 
 
 {% endblock %}
