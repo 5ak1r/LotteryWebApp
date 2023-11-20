@@ -103,6 +103,8 @@ def login():
 
                 current_user.successful_logins += 1
 
+                del session['authentication_attempts']
+                
                 db.session.commit()
 
                 if current_user.role == "admin":
