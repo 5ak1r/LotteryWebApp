@@ -33,7 +33,9 @@ def create_draw():
                           + str(form.number5.data) + ' '
                           + str(form.number6.data))
         # create a new draw with the form data.
-        new_draw = Draw(user_id=current_user.id, numbers=submitted_numbers, master_draw=False, lottery_round=0, draw_key=current_user.draw_key)
+        # Commenting out Symmetric Encryption
+        # new_draw = Draw(user_id=current_user.id, numbers=submitted_numbers, master_draw=False, lottery_round=0, draw_key=current_user.draw_key)
+        new_draw = Draw(user_id=current_user.id, numbers=submitted_numbers, master_draw=False, lottery_round=0)
         # add the new draw to the database
         db.session.add(new_draw)
         db.session.commit()
@@ -57,7 +59,8 @@ def view_draws():
     if len(playable_draws) != 0:
         make_transient(playable_draws)
         for j in playable_draws:
-            j.view_draw(current_user.draw_key)
+            j.view_draw(current_user.private_key)
+            #j.view_draw(current_user.draw_key)
         # re-render lottery page with playable draws
         return render_template('lottery/lottery.html', playable_draws=playable_draws)
     else:
@@ -77,7 +80,7 @@ def check_draws():
     if len(played_draws) != 0:
         make_transient(played_draws)
         for j in played_draws:
-            j.view_draw(current_user.draw_key)
+            j.view_draw(current_user.private_key)
         return render_template('lottery/lottery.html', results=played_draws, played=True)
 
     # if no played draws exist [all draw entries have been played therefore wait for next lottery round]

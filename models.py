@@ -1,15 +1,25 @@
 from app import db, app
 from flask_login import UserMixin
 from datetime import datetime
-from cryptography.fernet import Fernet
-import pyotp
+#from cryptography.fernet import Fernet
+import pyotp, bcrypt, rsa, pickle
 
+
+'''
+Commenting out Symmetric Encryption
 def encrypt(data, draw_key):
     return Fernet(draw_key).encrypt(bytes(data, 'utf-8'))
 
 
 def decrypt(data, draw_key):
     return Fernet(draw_key).decrypt(data).decode('utf-8')
+'''
+
+def encrypt(data, public_key):
+    return rsa.encrypt(data.encode(), pickle.loads(public_key))
+
+def decrypt(data, private_key):
+    return rsa.decrypt(data, pickle.loads(private_key)).decode()
 
 class User(db.Model, UserMixin):
     __tablename__ = 'users'
@@ -37,8 +47,13 @@ class User(db.Model, UserMixin):
     ip_last = db.Column(db.String(100), nullable=True)
     successful_logins = db.Column(db.Integer, nullable=False)
 
+    # Asymmetric encryption keys
+    public_key = db.Column(db.BLOB, nullable=False)
+    private_key = db.Column(db.BLOB, nullable=False)
+    '''
     # Symmetric encryption key
     draw_key = db.Column(db.BLOB, nullable=False, default=Fernet.generate_key())
+    '''
 
     # Define the relationship to Draw
     draws = db.relationship('Draw')
@@ -50,7 +65,7 @@ class User(db.Model, UserMixin):
         self.phone = phone
         self.dob = dob
         self.postcode = postcode
-        self.password = password
+        self.password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
         self.role = role
         self.registered_on = datetime.now()
         self.current_login = None
@@ -59,14 +74,18 @@ class User(db.Model, UserMixin):
         self.ip_last = None
         self.successful_logins = 0
 
+        public_key, private_key = rsa.newkeys(512)
+        self.public_key = pickle.dumps(public_key)
+        self.private_key = pickle.dumps(private_key)
+
     def get_2fa_uri(self):
         return str(pyotp.totp.TOTP(self.pin_key).provisioning_uri(
             name=self.email)
         )
     
     def verify_password(self, password):
-        return self.password == password
-    
+        return bcrypt.checkpw(password.encode('utf-8'), self.password)
+
     def verify_postcode(self, postcode):
         return self.postcode == postcode
     
@@ -98,18 +117,31 @@ class Draw(db.Model):
     lottery_round = db.Column(db.Integer, nullable=False, default=0)
 
 
-    
+    '''
+    Commenting out Symmetric Encryption
     def __init__(self, user_id, numbers, master_draw, lottery_round, draw_key):
+    '''
+    def __init__(self, user_id, numbers, master_draw, lottery_round, public_key):
         self.user_id = user_id
-        self.numbers = encrypt(numbers, draw_key)
+        # Commenting out Symmetric Encryption
+        # self.numbers = encrypt(numbers, draw_key)
+        self.numbers = encrypt(numbers, public_key)
         self.been_played = False
         self.matches_master = False
         self.master_draw = master_draw
         self.lottery_round = lottery_round
-        self.draw_key = draw_key
+        #self.draw_key = draw_key
+        self.private_key = private_key
 
+
+    '''
+    Commenting out Symmetric Encryption
     def view_draw(self, draw_key):
         self.numbers = decrypt(self.numbers, draw_key)
+    '''
+
+    def view_draw(self, private_key):
+        self.numbers = decrypt(self.numbers, private_key)
 
 
 def init_db():
