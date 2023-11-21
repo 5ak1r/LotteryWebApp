@@ -4,8 +4,9 @@ from wtforms.validators import Email, Length, InputRequired, EqualTo, Validation
 from datetime import datetime
 import re
 
-
+# custom validators for registration using regex
 def name_character_check(form, field):
+    # name cannot include the special characters listed below
     excluded_chars = "*?!'^+%&/()=}][{$#@<>"
 
     for char in field.data:
@@ -14,6 +15,7 @@ def name_character_check(form, field):
 
 
 def validate_phone(form, field):
+    # phone number must be of the form 'XXXX-XXX-XXXX' where X is a digit (0-9)
     p = re.compile('[0-9]{4}\-[0-9]{3}\-[0-9]{4}')
 
     if not p.match(field.data):
@@ -21,6 +23,7 @@ def validate_phone(form, field):
 
 
 def validate_password(form, field):
+    # password must include at least one digit, lower case word character, upper case word character and special character
     p = re.compile(r'(?=.*\d)(?=.*[A-Z])(?=.*[a-z])(?=.*[^a-zA-Z\d\s])')
 
     if not p.match(field.data):
@@ -33,7 +36,9 @@ def validate_dob(form, field):
 
     validity = False
 
+    # if string format is correct, form DD/MM/YYYY
     if p.match(field.data):
+        # checking date is valid, accounting for leap years (not required)
         d, m, y = int(field.data[0:2]), field.data[3:5], int(field.data[6:])
         if 1900 <= y <= datetime.now().year:
             if m in ["09", "04", "06", "11"] and d <= 30:
@@ -50,17 +55,16 @@ def validate_dob(form, field):
         raise ValidationError("Date is not of the form DD/MM/YYYY, or it is not a valid date.")
 
 def validate_postcode(form, field):
-    #XY YXX
-    #XYY YXX
-    #XXY YXX
+    # postcode must be of the forms XY YXX, XYY YXX or XXY YXX, where X is a capital letter; Y is an integer (0-9)
     p = re.compile(r'([A-Z])([0-9]|[0-9]{2}|[A-Z][0-9])( [0-9][A-Z]{2})')
 
     if not p.match(field.data):
         raise ValidationError("Postcode is not of any of the required forms: XY YXX, XYY YXX, XXY YXX.")
     
     
-
+# registration flask form
 class RegisterForm(FlaskForm):
+    # inputs required for all fields
     email = StringField(validators=[InputRequired(), Email(message="Invalid Email Address")])
     firstname = StringField(validators=[InputRequired(), name_character_check])
     lastname = StringField(validators=[InputRequired(), name_character_check])
@@ -68,12 +72,15 @@ class RegisterForm(FlaskForm):
     dob = StringField(validators=[InputRequired(), validate_dob])
     postcode = StringField(validators=[InputRequired(), validate_postcode])
     password = PasswordField(validators=[InputRequired(), Length(min=6, max=12), validate_password])
+    # must match password
     confirm_password = PasswordField(validators=[InputRequired(), EqualTo('password',
                                                                          message="Passwords do not match.")])
     submit = SubmitField()
 
 
+# login flask form
 class LoginForm(FlaskForm):
+    # no field can be empty
     email = StringField(validators=[InputRequired(), Email()])
     password = PasswordField(validators=[InputRequired()])
     postcode = StringField(validators=[InputRequired()])
@@ -82,6 +89,7 @@ class LoginForm(FlaskForm):
     submit = SubmitField()
 
 
+# password change flask form
 class PasswordForm(FlaskForm):
     current_password = PasswordField(id='password', validators=[InputRequired()])
     show_password = BooleanField('Show password', id='check')

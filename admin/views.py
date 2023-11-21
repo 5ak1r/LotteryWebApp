@@ -72,11 +72,13 @@ def view_winning_draw():
 
     # if a winning draw exists
     if current_winning_draw:
+        # disconnects from database, avoiding decryption within the db
         make_transient(current_winning_draw)
         '''
         Commenting out Symmetric Encryption
         current_winning_draw.view_draw(current_user.draw_key)
         '''
+        # decrypt the winning draw
         current_winning_draw.view_draw(current_user.private_key)
         # re-render admin page with current winning draw and lottery round
         return render_template('admin/admin.html', winning_draw=current_winning_draw, name=current_user.firstname)
@@ -169,6 +171,7 @@ def logs():
     return render_template('admin/admin.html', logs=content, name=current_user.firstname)
 
 
+# view user activity
 @admin_blueprint.route('/view_user_activity')
 @requires_roles('admin')
 def view_user_activity():

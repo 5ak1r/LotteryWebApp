@@ -2,7 +2,7 @@ from flask_wtf import FlaskForm
 from wtforms import IntegerField, SubmitField
 from wtforms.validators import InputRequired, NumberRange
 
-
+# form for lottery draw manual inputs
 class DrawForm(FlaskForm):
 
     def validate(self, **kwargs):
@@ -16,6 +16,7 @@ class DrawForm(FlaskForm):
 
         return False
 
+    # fields must contain a value and must be integers between 1 and 60 inclusive
     number1 = IntegerField(id='no1', validators=[InputRequired(), NumberRange(min=1, max=60)])
     number2 = IntegerField(id='no2', validators=[InputRequired(), NumberRange(min=1, max=60)])
     number3 = IntegerField(id='no3', validators=[InputRequired(), NumberRange(min=1, max=60)])

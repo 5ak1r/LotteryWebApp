@@ -26,17 +26,20 @@ def create_draw():
     form = DrawForm()
 
     if form.validate_on_submit():
+        # sorts the integers from lowest to highest
         numbers = sorted(form.number1.data,
                         form.number2.data,
                         form.number3.data,
                         form.number4.data,
                         form.number5.data,
                         form.number6.data)
-
+        # combine integers into a single string
         submitted_numbers = " ".join(map(str, numbers))
         # create a new draw with the form data.
-        # Commenting out Symmetric Encryption
-        # new_draw = Draw(user_id=current_user.id, numbers=submitted_numbers, master_draw=False, lottery_round=0, draw_key=current_user.draw_key)
+        '''
+        Commenting out Symmetric Encryption
+        new_draw = Draw(user_id=current_user.id, numbers=submitted_numbers, master_draw=False, lottery_round=0, draw_key=current_user.draw_key)
+        '''
         new_draw = Draw(user_id=current_user.id, numbers=submitted_numbers, master_draw=False, lottery_round=0)
         # add the new draw to the database
         db.session.add(new_draw)
@@ -59,7 +62,9 @@ def view_draws():
 
     # if playable draws exist
     if len(playable_draws) != 0:
+        # does not change the values of the database
         make_transient(playable_draws)
+        # decrypt all the draws for viewability
         for j in playable_draws:
             j.view_draw(current_user.private_key)
             #j.view_draw(current_user.draw_key)
@@ -80,7 +85,9 @@ def check_draws():
 
     # if played draws exist
     if len(played_draws) != 0:
+        # does not change the values of the database
         make_transient(played_draws)
+        # decrypt the draws for viewability
         for j in played_draws:
             j.view_draw(current_user.private_key)
         return render_template('lottery/lottery.html', results=played_draws, played=True)

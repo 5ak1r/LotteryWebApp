@@ -1,3 +1,4 @@
+# do not forget to delete
 from app import app, db
 from models import User
 

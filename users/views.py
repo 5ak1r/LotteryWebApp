@@ -72,6 +72,7 @@ def login():
     if current_user.is_anonymous:
         form = LoginForm()
 
+        # begin counting login attempts, user has 3 before they are redirected
         if not session.get('authentication_attempts'):
             session['authentication_attempts'] = 0
 
@@ -79,6 +80,7 @@ def login():
             user = User.query.filter_by(email=form.email.data).first()
 
             if not user or not user.verify_password(form.password.data) or not user.verify_pin(form.pin.data) or not user.verify_postcode(form.postcode.data):
+                # failed login, -1 attempts left
                 session['authentication_attempts'] += 1
                 logging.warning('SECURITY - Failed Login [%s, %s]',
                                 current_user.email,
@@ -89,6 +91,7 @@ def login():
                 flash('Please check your login details and try again, {} login attempts remaining'.format(3 - session.get('authentication_attempts')))
                 return render_template('users/login.html', form=form)
             else:
+                # successful login
                 login_user(user)
 
                 logging.warning('SECURITY - Log In [%s, %s, %s]',
@@ -96,6 +99,7 @@ def login():
                                 current_user.email,
                                 request.remote_addr)
                 
+                # storing information about current and last logins to the database
                 current_user.last_login = current_user.current_login
                 current_user.ip_last = current_user.ip_current
                 current_user.current_login = datetime.now()
@@ -103,10 +107,11 @@ def login():
 
                 current_user.successful_logins += 1
 
-                del session['authentication_attempts']
-                
                 db.session.commit()
+                # remove attempts after successful login
+                del session['authentication_attempts']
 
+                # redirects admin to the admin page; user to lottery page
                 if current_user.role == "admin":
                     return redirect(url_for('admin.admin'))
                 else:

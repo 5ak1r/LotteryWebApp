@@ -74,21 +74,26 @@ class User(db.Model, UserMixin):
         self.ip_last = None
         self.successful_logins = 0
 
+        # generate unique user asymmetric keys
         public_key, private_key = rsa.newkeys(512)
         self.public_key = pickle.dumps(public_key)
         self.private_key = pickle.dumps(private_key)
 
+    # returns the URI for 2FA
     def get_2fa_uri(self):
         return str(pyotp.totp.TOTP(self.pin_key).provisioning_uri(
             name=self.email)
         )
     
+    # returns boolean, True if password entered correctly compared to hashed value in database; False otherwise
     def verify_password(self, password):
         return bcrypt.checkpw(password.encode('utf-8'), self.password)
 
+    # returns boolean, True if input postcode matches value in database; False otherwise
     def verify_postcode(self, postcode):
         return self.postcode == postcode
     
+    # returns boolean, True if input pin matches value in authenticator app; False otherwise
     def verify_pin(self, pin):
         return pyotp.TOTP(self.pin_key).verify(pin)
 
@@ -123,8 +128,10 @@ class Draw(db.Model):
     '''
     def __init__(self, user_id, numbers, master_draw, lottery_round, public_key):
         self.user_id = user_id
-        # Commenting out Symmetric Encryption
-        # self.numbers = encrypt(numbers, draw_key)
+        '''
+        Commenting out Symmetric Encryption
+        self.numbers = encrypt(numbers, draw_key)
+        '''
         self.numbers = encrypt(numbers, public_key)
         self.been_played = False
         self.matches_master = False
@@ -139,11 +146,11 @@ class Draw(db.Model):
     def view_draw(self, draw_key):
         self.numbers = decrypt(self.numbers, draw_key)
     '''
-
+    # decrypts draw numbers but does not save to database
     def view_draw(self, private_key):
         self.numbers = decrypt(self.numbers, private_key)
 
-
+# reset and reinitialise the database with one admin user
 def init_db():
     with app.app_context():
         db.drop_all()

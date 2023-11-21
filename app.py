@@ -4,17 +4,19 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_qrcode import QRcode
 from flask_login import LoginManager, current_user
 from functools import wraps
+from flask_talisman import Talisman
 import logging, os
 
 # CONFIG
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'LongAndRandomSecretKey'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///lottery.db'
-app.config['SQLALCHEMY_ECHO'] = True
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('SQLALCHEMY_DATABASE_URI')
+app.config['SQLALCHEMY_ECHO'] = os.getenv('SQLALCHEMY_ECHO')
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = os.getenv('SQLALCHEMY_TRACK_MODIFICATIONS')
 app.config['RECAPTCHA_PUBLIC_KEY'] = os.getenv('RECAPTCHA_PUBLIC_KEY')
 app.config['RECAPTCHA_PRIVATE_KEY'] = os.getenv('RECAPTCHA_PRIVATE_KEY')
 
+# only allows permitted roles to access certain webpages/methods
 def requires_roles(*roles):
     def wrapper(f):
         @wraps(f)
@@ -32,8 +34,31 @@ def requires_roles(*roles):
     return wrapper
 
 
-# initialise database and QRcode
+# create custom content security policy
+csp = {
+    'default-src': [
+        '\'self\'',
+        'https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.2/css/bulma.min.css'
+    ],
+    'frame-src': [
+        '\'self\'',
+        'https://www.google.com/recaptcha/',
+        'https://recaptcha.google.com/recaptcha/'
+    ],
+    'script-src': [
+        '\'self\'',
+        '\'unsafe-inline\'',
+        'https://www.google.com/recaptcha/',
+        'https://www.gstatic.com/recaptcha/'
+    ],
+    'img-src': [
+        'data:'
+    ]
+}
+
+# initialise database, talisman and QRcode
 db = SQLAlchemy(app)
+talisman = Talisman(app, content_security_policy=csp)
 qrcode = QRcode(app)
 
 # initialise logger and file handler
@@ -42,7 +67,7 @@ logger.setLevel(logging.DEBUG)
 file_handler = logging.FileHandler('lottery.log', 'a')
 file_handler.setLevel(logging.WARNING)
 
-
+# filter for logs that include the string 'SECURITY'
 class SecurityFilter(logging.Filter):
     
     def filter(self, record):
@@ -110,3 +135,5 @@ def service_unavailable(error):
 
 if __name__ == "__main__":
     app.run()
+    #app.run(ssl_context='adhoc')
+    #app.run(ssl_context=('cert.pem', 'key.pem'))
