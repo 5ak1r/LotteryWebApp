@@ -4,6 +4,7 @@ from flask import Blueprint, render_template, flash, redirect, url_for
 from app import db, requires_roles
 from models import User, Draw
 from flask_login import current_user
+from sqlalchemy.orm import make_transient
 
 # CONFIG
 admin_blueprint = Blueprint('admin', __name__, template_folder='templates')
@@ -44,7 +45,7 @@ def generate_winning_draw():
     winning_numbers_string = winning_numbers_string[:-1]
 
     # create a new draw object.
-    new_winning_draw = Draw(user_id=current_user.id, numbers=winning_numbers_string, master_draw=True, lottery_round=lottery_round)
+    new_winning_draw = Draw(user_id=current_user.id, numbers=winning_numbers_string, master_draw=True, lottery_round=lottery_round, draw_key = current_user.draw_key)
 
     # add the new winning draw to the database
     db.session.add(new_winning_draw)
@@ -63,8 +64,12 @@ def view_winning_draw():
     # get winning draw from DB
     current_winning_draw = Draw.query.filter_by(master_draw=True,been_played=False).first()
 
+
     # if a winning draw exists
     if current_winning_draw:
+        make_transient(current_winning_draw)
+        current_winning_draw.view_draw(current_user.draw_key)
+
         # re-render admin page with current winning draw and lottery round
         return render_template('admin/admin.html', winning_draw=current_winning_draw, name=current_user.firstname)
 
