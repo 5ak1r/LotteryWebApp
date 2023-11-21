@@ -131,7 +131,7 @@ class Draw(db.Model):
         self.master_draw = master_draw
         self.lottery_round = lottery_round
         #self.draw_key = draw_key
-        self.private_key = private_key
+        self.public_key = public_key
 
 
     '''

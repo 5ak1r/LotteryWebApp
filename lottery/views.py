@@ -26,12 +26,14 @@ def create_draw():
     form = DrawForm()
 
     if form.validate_on_submit():
-        submitted_numbers = (str(form.number1.data) + ' '
-                          + str(form.number2.data) + ' '
-                          + str(form.number3.data) + ' '
-                          + str(form.number4.data) + ' '
-                          + str(form.number5.data) + ' '
-                          + str(form.number6.data))
+        numbers = sorted(form.number1.data,
+                        form.number2.data,
+                        form.number3.data,
+                        form.number4.data,
+                        form.number5.data,
+                        form.number6.data)
+
+        submitted_numbers = " ".join(map(str, numbers))
         # create a new draw with the form data.
         # Commenting out Symmetric Encryption
         # new_draw = Draw(user_id=current_user.id, numbers=submitted_numbers, master_draw=False, lottery_round=0, draw_key=current_user.draw_key)
