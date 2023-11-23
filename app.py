@@ -38,6 +38,7 @@ def requires_roles(*roles):
 csp = {
     'default-src': [
         '\'self\'',
+        '\'unsafe-inline\'',
         'https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.2/css/bulma.min.css'
     ],
     'frame-src': [
@@ -109,27 +110,27 @@ app.register_blueprint(lottery_blueprint)
 # ERROR HANDLING
 @app.errorhandler(400)
 def bad_request(error):
-    return render_template('errors/error.html', error="Bad Request", text="The server cannot or will not process the request due to something that is perceived to be a client error.",
+    return render_template('errors/error.html', error="400 Bad Request", text="The server cannot or will not process the request due to something that is perceived to be a client error.",
                            link="https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400"), 400
 
 @app.errorhandler(403)
 def forbidden(error):
-    return render_template('errors/error.html', error="Forbidden", text="The client does not have access rights to the content.",
+    return render_template('errors/error.html', error="403 Forbidden", text="The client does not have access rights to the content.",
                            link="https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/403"), 403
 
 @app.errorhandler(404)
 def not_found(error):
-     return render_template('errors/error.html', error="Not Found", text="The server cannot find the requested resource.",
+     return render_template('errors/error.html', error="404 Not Found", text="The server cannot find the requested resource.",
                            link="https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404"), 404
 
 @app.errorhandler(500)
 def internal_server_error(error):
-    return render_template('errors/error.html', error="Internal Server Error", text="The server has encountered a situation it does not know how to handle.",
+    return render_template('errors/error.html', error="500 Internal Server Error", text="The server has encountered a situation it does not know how to handle.",
                            link="https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/500"), 500
 
 @app.errorhandler(503)
 def service_unavailable(error):
-    return render_template('errors/error.html', error="Service Unavailable", text="The server is not ready to handle the request.",
+    return render_template('errors/error.html', error="503 Service Unavailable", text="The server is not ready to handle the request.",
                            link="https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/503"), 503
 
 

@@ -4,6 +4,7 @@ from app import db, requires_roles
 from lottery.forms import DrawForm
 from models import Draw
 from flask_login import current_user, login_required
+from sqlalchemy.orm import make_transient
 
 # CONFIG
 lottery_blueprint = Blueprint('lottery', __name__, template_folder='templates')

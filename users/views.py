@@ -116,7 +116,8 @@ def login():
                     return redirect(url_for('admin.admin'))
                 else:
                     return redirect(url_for('lottery.lottery'))
-            
+        elif not form.recaptcha.data:
+            flash("Please complete the reCAPTCHA")
 
         return render_template('users/login.html', form=form)
     else:
