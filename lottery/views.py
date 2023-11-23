@@ -27,12 +27,12 @@ def create_draw():
 
     if form.validate_on_submit():
         # sorts the integers from lowest to highest
-        numbers = sorted(form.number1.data,
+        numbers = sorted([form.number1.data,
                         form.number2.data,
                         form.number3.data,
                         form.number4.data,
                         form.number5.data,
-                        form.number6.data)
+                        form.number6.data])
         # combine integers into a single string
         submitted_numbers = " ".join(map(str, numbers))
         # create a new draw with the form data.
@@ -40,7 +40,7 @@ def create_draw():
         Commenting out Symmetric Encryption
         new_draw = Draw(user_id=current_user.id, numbers=submitted_numbers, master_draw=False, lottery_round=0, draw_key=current_user.draw_key)
         '''
-        new_draw = Draw(user_id=current_user.id, numbers=submitted_numbers, master_draw=False, lottery_round=0)
+        new_draw = Draw(user_id=current_user.id, numbers=submitted_numbers, master_draw=False, lottery_round=0, public_key=current_user.public_key)
         # add the new draw to the database
         db.session.add(new_draw)
         db.session.commit()

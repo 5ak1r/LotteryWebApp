@@ -6,7 +6,7 @@ from users.forms import RegisterForm, LoginForm, PasswordForm
 from markupsafe import Markup
 from flask_login import current_user, login_user, logout_user, login_required
 from datetime import datetime
-import pyotp, logging
+import logging
 
 # CONFIG
 users_blueprint = Blueprint('users', __name__, template_folder='templates')
@@ -55,7 +55,7 @@ def register():
         db.session.add(new_user)
         db.session.commit()
 
-        session['username'] = new_user.email
+        session['email'] = new_user.email
         # sends user to set up 2-factor authentication; sends admin back to admin page
         if role == 'user':
             return redirect(url_for('users.setup_2fa'))
@@ -158,16 +158,16 @@ def account():
 
 @users_blueprint.route('/setup_2fa')
 def setup_2fa():
-    if 'username' not in session:
+    if 'email' not in session:
         return redirect(url_for('main.index'))
-    user = User.query.filter_by(email=session['username']).first()
+    user = User.query.filter_by(email=session['email']).first()
 
     if not user:
         return redirect(url_for('main.index'))
 
-    del session['username']
+    del session['email']
 
-    return render_template('users/setup_2fa.html', username=user.email, uri=user.get_2fa_uri()), 200, {
+    return render_template('users/setup_2fa.html', email=user.email, uri=user.get_2fa_uri()), 200, {
         'Cache-Control': 'no-cache, no-store, must-revalidate',
         'Pragma': 'no-cache',
         'Expires': '0'
