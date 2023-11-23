@@ -16,7 +16,7 @@ def name_character_check(form, field):
 
 def validate_phone(form, field):
     # phone number must be of the form 'XXXX-XXX-XXXX' where X is a digit (0-9)
-    p = re.compile('[0-9]{4}\-[0-9]{3}\-[0-9]{4}')
+    p = re.compile(r'^[0-9]{4}\-[0-9]{3}\-[0-9]{4}$')
 
     if not p.match(field.data):
         raise ValidationError("Phone number is not of the form XXXX-XXX-XXXX.")
@@ -32,7 +32,7 @@ def validate_password(form, field):
 
 
 def validate_dob(form, field):
-    p = re.compile('(0[1-9]|[12][0-9]|3[01])/(0[1-9]|1[0-2])/\d{4}')
+    p = re.compile(r'^(0[1-9]|[12][0-9]|3[01])/(0[1-9]|1[0-2])/\d{4}$')
 
     validity = False
 
@@ -56,7 +56,7 @@ def validate_dob(form, field):
 
 def validate_postcode(form, field):
     # postcode must be of the forms XY YXX, XYY YXX or XXY YXX, where X is a capital letter; Y is an integer (0-9)
-    p = re.compile(r'([A-Z])([0-9]|[0-9]{2}|[A-Z][0-9])( [0-9][A-Z]{2})')
+    p = re.compile(r'^([A-Z])([0-9]|[0-9]{2}|[A-Z][0-9])( [0-9][A-Z]{2})$')
 
     if not p.match(field.data):
         raise ValidationError("Postcode is not of any of the required forms: XY YXX, XYY YXX, XXY YXX.")
