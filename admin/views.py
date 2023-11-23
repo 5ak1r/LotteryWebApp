@@ -2,7 +2,7 @@
 import random
 from flask import Blueprint, render_template, flash, redirect, url_for
 from app import db, requires_roles
-from models import User, Draw
+from models import User, Draw, decrypt
 from flask_login import current_user, login_required
 from sqlalchemy.orm import make_transient
 
@@ -46,12 +46,12 @@ def generate_winning_draw():
         winning_numbers_string += str(winning_numbers[i]) + ' '
     winning_numbers_string = winning_numbers_string[:-1]
 
-    # create a new draw object.
-
     '''
     Commenting out Symmetric Encryption
     new_winning_draw = Draw(user_id=current_user.id, numbers=winning_numbers_string, master_draw=True, lottery_round=lottery_round, draw_key = current_user.draw_key)
     '''
+
+    # create a new draw object.
     new_winning_draw = Draw(user_id=current_user.id, numbers=winning_numbers_string, master_draw=True, lottery_round=lottery_round, public_key = current_user.public_key)
 
     # add the new winning draw to the database
@@ -117,10 +117,10 @@ def run_lottery():
 
             # for each unplayed user draw
             for draw in user_draws:
-
                 # get the owning user (instance/object)
                 user = User.query.filter_by(id=draw.user_id).first()
-
+                draw.numbers = decrypt(draw.numbers, user.private_key)
+                current_winning_draw.numbers = decrypt(current_winning_draw.numbers, current_user.private_key)
                 # if user draw matches current unplayed winning draw
                 if draw.numbers == current_winning_draw.numbers:
 
