@@ -5,9 +5,11 @@ from flask_qrcode import QRcode
 from flask_login import LoginManager, current_user
 from functools import wraps
 from flask_talisman import Talisman
+from dotenv import load_dotenv
 import logging, os
 
 # CONFIG
+load_dotenv()
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('SQLALCHEMY_DATABASE_URI')
