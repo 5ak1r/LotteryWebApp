@@ -134,6 +134,6 @@ def service_unavailable(error):
 
 
 if __name__ == "__main__":
-    app.run()
+    #app.run()
     #app.run(ssl_context='adhoc')
-    #app.run(ssl_context=('cert.pem', 'key.pem'))
+    app.run(ssl_context=('cert.pem', 'key.pem'))
