@@ -6,7 +6,7 @@ from users.forms import RegisterForm, LoginForm, PasswordForm
 from markupsafe import Markup
 from flask_login import current_user, login_user, logout_user, login_required
 from datetime import datetime
-import logging
+import logging, bcrypt
 
 # CONFIG
 users_blueprint = Blueprint('users', __name__, template_folder='templates')
@@ -88,7 +88,7 @@ def login():
                 if session.get('authentication_attempts') >= 3:
                     flash(Markup('Number of incorrect login attempts exceeded. Please click <a href="/reset">here</a> to reset.'))
                     return render_template('users/login.html')
-                flash(f"Please check your login details and try again, {3 - session['authentication_attempts']} login {'attempts' if 3 - session['authentication_attempts'] != 1 else 'attempt'} remaining.")
+                flash(f"Please check your login details and try again. {3 - session['authentication_attempts']} login {'attempts' if 3 - session['authentication_attempts'] != 1 else 'attempt'} remaining.")
                 return render_template('users/login.html', form=form)
             else:
                 # successful login
@@ -181,9 +181,9 @@ def change_password():
 
     if form.validate_on_submit():
 
-        if form.current_password.data == current_user.password:
-            if form.new_password.data != current_user.password:
-                current_user.password = form.new_password.data
+        if current_user.verify_password(form.current_password.data):
+            if not current_user.verify_password(form.new_password.data):
+                current_user.password = bcrypt.hashpw(form.new_password.data.encode('utf-8'), bcrypt.gensalt())
                 db.session.commit()
                 flash('Password changed successfully')
             else:
