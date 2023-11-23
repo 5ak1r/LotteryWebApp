@@ -83,12 +83,12 @@ def login():
                 # failed login, -1 attempts left
                 session['authentication_attempts'] += 1
                 logging.warning('SECURITY - Failed Login [%s, %s]',
-                                current_user.email,
+                                form.email.data,
                                 request.remote_addr)
                 if session.get('authentication_attempts') >= 3:
                     flash(Markup('Number of incorrect login attempts exceeded. Please click <a href="/reset">here</a> to reset.'))
                     return render_template('users/login.html')
-                flash('Please check your login details and try again, {} login attempts remaining'.format(3 - session.get('authentication_attempts')))
+                flash(f"Please check your login details and try again, {3 - session['authentication_attempts']} login {'attempts' if 3 - session['authentication_attempts'] != 1 else 'attempt'} remaining.")
                 return render_template('users/login.html', form=form)
             else:
                 # successful login
