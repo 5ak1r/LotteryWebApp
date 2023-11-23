@@ -64,9 +64,9 @@ def view_draws():
     # if playable draws exist
     if len(playable_draws) != 0:
         # does not change the values of the database
-        make_transient(playable_draws)
         # decrypt all the draws for viewability
         for j in playable_draws:
+            make_transient(j)
             j.view_draw(current_user.private_key)
             #j.view_draw(current_user.draw_key)
         # re-render lottery page with playable draws
@@ -87,9 +87,9 @@ def check_draws():
     # if played draws exist
     if len(played_draws) != 0:
         # does not change the values of the database
-        make_transient(played_draws)
         # decrypt the draws for viewability
         for j in played_draws:
+            make_transient(j)
             j.view_draw(current_user.private_key)
         return render_template('lottery/lottery.html', results=played_draws, played=True)
 

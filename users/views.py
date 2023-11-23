@@ -126,12 +126,12 @@ def login():
 
 @users_blueprint.route('/logout')
 def logout():
-    logout_user()
-
     logging.warning('SECURITY - Log Out [%s, %s, %s]',
                                 current_user.id,
                                 current_user.email,
                                 request.remote_addr)
+    
+    logout_user()
     
     return render_template('main/index.html')
 
