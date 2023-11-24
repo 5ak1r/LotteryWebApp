@@ -86,11 +86,6 @@ def check_draws():
 
     # if played draws exist
     if len(played_draws) != 0:
-        # does not change the values of the database
-        # decrypt the draws for viewability
-        for j in played_draws:
-            make_transient(j)
-            j.view_draw(current_user.private_key)
         return render_template('lottery/lottery.html', results=played_draws, played=True)
 
     # if no played draws exist [all draw entries have been played therefore wait for next lottery round]
