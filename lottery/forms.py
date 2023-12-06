@@ -23,6 +23,7 @@ class DrawForm(FlaskForm):
         else:
             return True
 
+        return False
 
     # fields must contain a value and must be integers between 1 and 60 inclusive
     number1 = IntegerField(id='no1', validators=[InputRequired(), NumberRange(min=1, max=60)])
