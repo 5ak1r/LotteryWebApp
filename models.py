@@ -29,7 +29,7 @@ class User(db.Model, UserMixin):
     # User authentication information.
     email = db.Column(db.String(100), nullable=False, unique=True)
     password = db.Column(db.String(100), nullable=False)
-    pin_key = db.Column(db.String(32), nullable=False, default=pyotp.random_base32())
+    pin_key = db.Column(db.String(32), nullable=False)
 
     # User information
     firstname = db.Column(db.String(100), nullable=False)
@@ -66,6 +66,7 @@ class User(db.Model, UserMixin):
         self.dob = dob
         self.postcode = postcode
         self.password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+        self.pin_key = pyotp.random_base32()
         self.role = role
         self.registered_on = datetime.now()
         self.current_login = None
