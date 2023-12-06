@@ -5,21 +5,19 @@ function luckyDip() {
     let draw = new Set();
 
 
-    // create cryptographically secure 32-bit unsigned integers
-    randomBuffer = new Uint32Array(6);
-    window.crypto.getRandomValues(randomBuffer);
-
     // while set does not contain 6 values, create a random value between 1 and 60
     while (draw.size < 6) {
         min = 1;
         max = 60;
-        for (let i=0; i < randomBuffer.length; i++) {
-            csRandomNumber = randomBuffer[i] / (0xFFFFFFFF)
-            value = Math.floor(csRandomNumber * (max - min + 1) + min);
+
+        // create a cryptographically secure 32-bit unsigned integer
+        randomBuffer = new Uint32Array(1);
+        window.crypto.getRandomValues(randomBuffer);
+        csRandomNumber = randomBuffer[i] / (0xFFFFFFFF)
+        value = Math.floor(csRandomNumber * (max - min + 1) + min);
             
-            // sets cannot contain duplicates so value is only added if it does not exist in set
-            draw.add(value)
-        }
+        // sets cannot contain duplicates so value is only added if it does not exist in set
+        draw.add(value)
   
     }
 
